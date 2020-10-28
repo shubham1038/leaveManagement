@@ -743,7 +743,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         //private baseUrl ="http://ec2-15-206-159-184.ap-south-1.compute.amazonaws.com/fse-pm-app/api/users/";
         //Https Url
 
-        this.baseUrl = "http://localhost:9080/fse-pm-app/api/emp/";
+        this.baseUrl = "https://shubhtech1038.xyz/fse-pm-app/api/emp/";
       }
 
       _createClass(EmployeeService, [{
@@ -970,7 +970,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _classCallCheck(this, LeaveRequestService);
 
         this.http = http;
-        this.baseUrl = "http://localhost:9080/fse-pm-app/api/leave/";
+        this.baseUrl = "https://shubhtech1038.xyz/fse-pm-app/api/leave/";
       }
 
       _createClass(LeaveRequestService, [{
@@ -996,7 +996,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         value: function getDashBoardRequests() {
           var _this5 = this;
 
-          return this.http.get('http://localhost:9080/fse-pm-app/api/dashBoard/' + 'request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(function (err) {
+          return this.http.get('https://shubhtech1038.xyz/fse-pm-app/api/dashBoard/' + 'request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(function (err) {
             return Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["throwError"])(_this5.errorHandler);
           }));
         }
@@ -1005,7 +1005,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         value: function getDashBoardGraphRequests() {
           var _this6 = this;
 
-          return this.http.get('http://localhost:9080/fse-pm-app/api/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(function (err) {
+          return this.http.get('https://shubhtech1038.xyz/fse-pm-app/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(function (err) {
             return Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["throwError"])(_this6.errorHandler);
           }));
         }
