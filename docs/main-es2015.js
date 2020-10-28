@@ -522,7 +522,7 @@ class LeaveRequestService {
         }));
     }
     getDashBoardGraphRequests() {
-        return this.http.get('https://shubhtech1038.xyz/fse-pm-app/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
+        return this.http.get('https://shubhtech1038.xyz/fse-pm-app/api/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
             return Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["throwError"])(this.errorHandler);
         }));
     }

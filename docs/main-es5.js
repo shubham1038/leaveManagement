@@ -1005,7 +1005,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         value: function getDashBoardGraphRequests() {
           var _this6 = this;
 
-          return this.http.get('https://shubhtech1038.xyz/fse-pm-app/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(function (err) {
+          return this.http.get('https://shubhtech1038.xyz/fse-pm-app/api/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(function (err) {
             return Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["throwError"])(_this6.errorHandler);
           }));
         }
