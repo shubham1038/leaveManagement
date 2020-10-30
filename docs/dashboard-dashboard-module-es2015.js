@@ -66052,11 +66052,11 @@ class DashboardCalenderComponent {
                 },
             },
             {
-                label: '<i class="fas fa-fw fa-trash-alt"></i>',
-                a11yLabel: 'Delete',
+                label: '<i class="fas fa-plus-square fa-spin fa-lg"></i>',
+                a11yLabel: 'Add',
                 onClick: ({ event }) => {
                     this.events = this.events.filter((iEvent) => iEvent !== event);
-                    this.handleEvent('Deleted', event);
+                    this.handleEvent('Add', event);
                 },
             },
         ];
@@ -66070,6 +66070,7 @@ class DashboardCalenderComponent {
             .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["map"])((results) => {
             return results.map((event) => {
                 return {
+                    actions: this.actions,
                     title: event.title,
                     start: Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["startOfDay"])(new Date(event.startDate)),
                     end: Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["endOfDay"])(new Date(event.endDate)),
@@ -66094,6 +66095,7 @@ class DashboardCalenderComponent {
             if ((Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["isSameDay"])(this.viewDate, date) && this.activeDayIsOpen === true) ||
                 events.length === 0) {
                 this.activeDayIsOpen = false;
+                this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', (obj) => { this.leaveAddEvent(obj); }, "OK");
             }
             else {
                 this.activeDayIsOpen = true;
@@ -66118,7 +66120,12 @@ class DashboardCalenderComponent {
     }
     handleEvent(action, event) {
         this.modalData = { event, action };
-        this.modelRef = this.modalService.openLeavePopUp(event, 'Leave Summary', (obj) => { this.leaveCancelEvent(obj); }, (obj) => { this.leaveEditEvent(obj); }, "Edit", "Cancel Leave");
+        if (action === 'Add') {
+            this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', (obj) => { this.leaveAddEvent(obj); }, "OK");
+        }
+        else {
+            this.modelRef = this.modalService.openLeavePopUp(event, 'Leave Summary', (obj) => { this.leaveCancelEvent(obj); }, (obj) => { this.leaveEditEvent(obj); }, "Edit", "Cancel Leave");
+        }
     }
     redirectAfterSave(popMesg, confirmCallback, popTitle) {
         this.modalService.confirmOK(popMesg, confirmCallback, popTitle);
@@ -66130,6 +66137,27 @@ class DashboardCalenderComponent {
     }
     leaveEditEvent(obj) {
         this.updateLeave(obj);
+    }
+    leaveAddEvent(obj) {
+        console.log(obj);
+        this.addLeave(obj.leave);
+    }
+    addLeave(leaveObj) {
+        this.modelRef.hide();
+        this.spinner.show();
+        this.leaveRequestService.addLeaves(leaveObj).subscribe(resp => {
+            if (resp === true) {
+                this.loadCalenderEvents();
+                this.activeDayIsOpen = false;
+                this.interactionService.refreshGraph();
+                this.redirectAfterSave("Leave added successfully", () => { }, "Success");
+                this.spinner.hide();
+            }
+            else {
+                this.redirectAfterSave("You already have active leave for applied period. Please re-visit your leaves", () => { }, "Error");
+                this.spinner.hide();
+            }
+        });
     }
     updateLeave(leaveObj) {
         var _a;
@@ -66229,7 +66257,7 @@ DashboardCalenderComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["�
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵclassProp"]("active", ctx.view === ctx.CalendarView.Day);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](3);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("ngIf", _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵpipeBind1"](23, 18, ctx.events$))("ngIfElse", _r1);
-    } }, directives: [angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵf"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵh"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵg"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgIf"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgSwitch"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgSwitchCase"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarMonthViewComponent"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarWeekViewComponent"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarDayViewComponent"], _angular_material_progress_spinner__WEBPACK_IMPORTED_MODULE_11__["MatSpinner"]], pipes: [angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵi"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["AsyncPipe"]], styles: [".modal-content[_ngcontent-%COMP%] {\r\n    position: relative;\r\n    display: flex;\r\n    flex-direction: column;\r\n    width: 100%;\r\n    pointer-events: auto;\r\n    background-color: #fff;\r\n    background-clip: padding-box;\r\n    border: 3px solid #428fe2 !important;\r\n    border-radius: 0.5rem;\r\n    outline: 0;\r\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9hcHAvZGFzaGJvYXJkL2Rhc2hib2FyZC1jYWxlbmRlci9kYXNoYm9hcmQtY2FsZW5kZXIuY29tcG9uZW50LmNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtJQUNJLGtCQUFrQjtJQUNsQixhQUFhO0lBQ2Isc0JBQXNCO0lBQ3RCLFdBQVc7SUFDWCxvQkFBb0I7SUFDcEIsc0JBQXNCO0lBQ3RCLDRCQUE0QjtJQUM1QixvQ0FBb0M7SUFDcEMscUJBQXFCO0lBQ3JCLFVBQVU7QUFDZCIsImZpbGUiOiJzcmMvYXBwL2Rhc2hib2FyZC9kYXNoYm9hcmQtY2FsZW5kZXIvZGFzaGJvYXJkLWNhbGVuZGVyLmNvbXBvbmVudC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIubW9kYWwtY29udGVudCB7XHJcbiAgICBwb3NpdGlvbjogcmVsYXRpdmU7XHJcbiAgICBkaXNwbGF5OiBmbGV4O1xyXG4gICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcclxuICAgIHdpZHRoOiAxMDAlO1xyXG4gICAgcG9pbnRlci1ldmVudHM6IGF1dG87XHJcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAjZmZmO1xyXG4gICAgYmFja2dyb3VuZC1jbGlwOiBwYWRkaW5nLWJveDtcclxuICAgIGJvcmRlcjogM3B4IHNvbGlkICM0MjhmZTIgIWltcG9ydGFudDtcclxuICAgIGJvcmRlci1yYWRpdXM6IDAuNXJlbTtcclxuICAgIG91dGxpbmU6IDA7XHJcbn0iXX0= */"] });
+    } }, directives: [angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵf"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵh"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵg"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgIf"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgSwitch"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgSwitchCase"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarMonthViewComponent"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarWeekViewComponent"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarDayViewComponent"], _angular_material_progress_spinner__WEBPACK_IMPORTED_MODULE_11__["MatSpinner"]], pipes: [angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵi"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["AsyncPipe"]], styles: [".modal-content[_ngcontent-%COMP%] {\r\n    position: relative;\r\n    display: flex;\r\n    flex-direction: column;\r\n    width: 100%;\r\n    pointer-events: auto;\r\n    background-color: #fff;\r\n    background-clip: padding-box;\r\n    border: 3px solid #428fe2 !important;\r\n    border-radius: 0.5rem;\r\n    outline: 0;\r\n}\r\n\r\n.fa-pencil-alt[_ngcontent-%COMP%] {\r\n    content: \"f303\";\r\n}\r\n\r\n.fa[_ngcontent-%COMP%], .fas[_ngcontent-%COMP%] {\r\n    font-weight: 900;\r\n}\r\n\r\n.fa-fw[_ngcontent-%COMP%] {\r\n    text-align: center;\r\n    width: 1.25em;\r\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9hcHAvZGFzaGJvYXJkL2Rhc2hib2FyZC1jYWxlbmRlci9kYXNoYm9hcmQtY2FsZW5kZXIuY29tcG9uZW50LmNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtJQUNJLGtCQUFrQjtJQUNsQixhQUFhO0lBQ2Isc0JBQXNCO0lBQ3RCLFdBQVc7SUFDWCxvQkFBb0I7SUFDcEIsc0JBQXNCO0lBQ3RCLDRCQUE0QjtJQUM1QixvQ0FBb0M7SUFDcEMscUJBQXFCO0lBQ3JCLFVBQVU7QUFDZDs7QUFFQTtJQUNJLGVBQWU7QUFDbkI7O0FBQ0E7SUFDSSxnQkFBZ0I7QUFDcEI7O0FBQ0E7SUFDSSxrQkFBa0I7SUFDbEIsYUFBYTtBQUNqQiIsImZpbGUiOiJzcmMvYXBwL2Rhc2hib2FyZC9kYXNoYm9hcmQtY2FsZW5kZXIvZGFzaGJvYXJkLWNhbGVuZGVyLmNvbXBvbmVudC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIubW9kYWwtY29udGVudCB7XHJcbiAgICBwb3NpdGlvbjogcmVsYXRpdmU7XHJcbiAgICBkaXNwbGF5OiBmbGV4O1xyXG4gICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcclxuICAgIHdpZHRoOiAxMDAlO1xyXG4gICAgcG9pbnRlci1ldmVudHM6IGF1dG87XHJcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAjZmZmO1xyXG4gICAgYmFja2dyb3VuZC1jbGlwOiBwYWRkaW5nLWJveDtcclxuICAgIGJvcmRlcjogM3B4IHNvbGlkICM0MjhmZTIgIWltcG9ydGFudDtcclxuICAgIGJvcmRlci1yYWRpdXM6IDAuNXJlbTtcclxuICAgIG91dGxpbmU6IDA7XHJcbn1cclxuXHJcbi5mYS1wZW5jaWwtYWx0IHtcclxuICAgIGNvbnRlbnQ6IFwiZjMwM1wiO1xyXG59XHJcbi5mYSwgLmZhcyB7XHJcbiAgICBmb250LXdlaWdodDogOTAwO1xyXG59XHJcbi5mYS1mdyB7XHJcbiAgICB0ZXh0LWFsaWduOiBjZW50ZXI7XHJcbiAgICB3aWR0aDogMS4yNWVtO1xyXG59Il19 */"] });
 /*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](DashboardCalenderComponent, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"],
         args: [{
@@ -66255,16 +66283,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/__ivy_ngcc__/fesm2015/core.js");
 /* harmony import */ var src_app_core_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! src/app/core/service */ "./src/app/core/service/index.ts");
 /* harmony import */ var src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! src/app/core/service/interaction.service */ "./src/app/core/service/interaction.service.ts");
-/* harmony import */ var _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @swimlane/ngx-charts */ "./node_modules/@swimlane/ngx-charts/__ivy_ngcc__/fesm2015/swimlane-ngx-charts.js");
+/* harmony import */ var src_app_shared_service_modal_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! src/app/shared/service/modal-service */ "./src/app/shared/service/modal-service.ts");
+/* harmony import */ var _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @swimlane/ngx-charts */ "./node_modules/@swimlane/ngx-charts/__ivy_ngcc__/fesm2015/swimlane-ngx-charts.js");
+
 
 
 
 
 
 class DashboardGraphComponent {
-    constructor(leaveRequestService, interactionService) {
+    constructor(leaveRequestService, interactionService, modalService) {
         this.leaveRequestService = leaveRequestService;
         this.interactionService = interactionService;
+        this.modalService = modalService;
         this.view = [650, 300];
         // options
         this.showXAxis = true;
@@ -66287,7 +66318,13 @@ class DashboardGraphComponent {
         return '#' + ('000000' + color).slice(-6);
     }
     onSelect(data) {
-        console.log('Item clicked', JSON.parse(JSON.stringify(data)));
+        this.leaveRequestService.getGraphSummary(data).subscribe(resp => {
+            this.modelRef = this.modalService.openGraphSummaryPopUp(resp, 'Leave Summary', (obj) => { this.okClickEvent(obj); }, "OK");
+            console.log('Item clicked', JSON.parse(JSON.stringify(data)));
+        });
+    }
+    okClickEvent(obj) {
+        this.modelRef.hide();
     }
     onActivate(data) {
         console.log('Activate', JSON.parse(JSON.stringify(data)));
@@ -66307,7 +66344,7 @@ class DashboardGraphComponent {
         });
     }
 }
-DashboardGraphComponent.ɵfac = function DashboardGraphComponent_Factory(t) { return new (t || DashboardGraphComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service__WEBPACK_IMPORTED_MODULE_1__["LeaveRequestService"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__["InteractionService"])); };
+DashboardGraphComponent.ɵfac = function DashboardGraphComponent_Factory(t) { return new (t || DashboardGraphComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service__WEBPACK_IMPORTED_MODULE_1__["LeaveRequestService"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__["InteractionService"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_shared_service_modal_service__WEBPACK_IMPORTED_MODULE_3__["ModalService"])); };
 DashboardGraphComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({ type: DashboardGraphComponent, selectors: [["app-dashboard-graph"]], decls: 5, vars: 23, consts: [[1, "row", "mt-4"], [3, "view", "scheme", "results", "gradient", "xAxis", "yAxis", "legend", "showXAxisLabel", "showYAxisLabel", "xAxisLabel", "yAxisLabel", "legendTitle", "select", "activate", "deactivate"], [3, "view", "scheme", "legend", "showXAxisLabel", "showYAxisLabel", "xAxis", "yAxis", "legendTitle", "xAxisLabel", "yAxisLabel", "results", "select", "activate", "deactivate"]], template: function DashboardGraphComponent_Template(rf, ctx) { if (rf & 1) {
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 0);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](1, "ngx-charts-bar-vertical-2d", 1);
@@ -66325,7 +66362,7 @@ DashboardGraphComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵ
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("view", ctx.view)("scheme", ctx.colorScheme)("results", ctx.multi)("gradient", ctx.gradient)("xAxis", ctx.showXAxis)("yAxis", ctx.showYAxis)("legend", ctx.showLegend)("showXAxisLabel", ctx.showXAxisLabel)("showYAxisLabel", ctx.showYAxisLabel)("xAxisLabel", ctx.xAxisLabel)("yAxisLabel", ctx.yAxisLabel)("legendTitle", ctx.legendTitle);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵadvance"](3);
         _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("view", ctx.view)("scheme", ctx.colorScheme)("legend", ctx.showLegend)("showXAxisLabel", ctx.showXAxisLabel)("showYAxisLabel", ctx.showYAxisLabel)("xAxis", ctx.showXAxis)("yAxis", ctx.showYAxis)("legendTitle", ctx.legendTitle1)("xAxisLabel", ctx.xAxisLabelBar)("yAxisLabel", ctx.yAxisLabel)("results", ctx.multi);
-    } }, directives: [_swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_3__["BarVertical2DComponent"], _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_3__["LineChartComponent"]], styles: ["\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzcmMvYXBwL2Rhc2hib2FyZC9kYXNoYm9hcmQtZ3JhcGgvZGFzaGJvYXJkLWdyYXBoLmNvbXBvbmVudC5jc3MifQ== */"] });
+    } }, directives: [_swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_4__["BarVertical2DComponent"], _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_4__["LineChartComponent"]], styles: ["\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzcmMvYXBwL2Rhc2hib2FyZC9kYXNoYm9hcmQtZ3JhcGgvZGFzaGJvYXJkLWdyYXBoLmNvbXBvbmVudC5jc3MifQ== */"] });
 /*@__PURE__*/ (function () { _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵsetClassMetadata"](DashboardGraphComponent, [{
         type: _angular_core__WEBPACK_IMPORTED_MODULE_0__["Component"],
         args: [{
@@ -66333,7 +66370,7 @@ DashboardGraphComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵ
                 templateUrl: './dashboard-graph.component.html',
                 styleUrls: ['./dashboard-graph.component.css']
             }]
-    }], function () { return [{ type: src_app_core_service__WEBPACK_IMPORTED_MODULE_1__["LeaveRequestService"] }, { type: src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__["InteractionService"] }]; }, null); })();
+    }], function () { return [{ type: src_app_core_service__WEBPACK_IMPORTED_MODULE_1__["LeaveRequestService"] }, { type: src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__["InteractionService"] }, { type: src_app_shared_service_modal_service__WEBPACK_IMPORTED_MODULE_3__["ModalService"] }]; }, null); })();
 
 
 /***/ }),

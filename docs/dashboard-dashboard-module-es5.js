@@ -11092,9 +11092,11 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         });
       } else {
         // IE
-        var event = document.createEvent('MouseEvent');
-        event.initEvent(name, bubbles, cancelable);
-        return event;
+        var _event = document.createEvent('MouseEvent');
+
+        _event.initEvent(name, bubbles, cancelable);
+
+        return _event;
       }
     }
 
@@ -38330,7 +38332,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
                 }
               } else {
                 // add a dummy event to the drop so if the event was removed from the original column the drag doesn't end early
-                var event = {
+                var _event2 = {
                   event: originalEvent,
                   left: 0,
                   top: 0,
@@ -38340,7 +38342,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
                   endsAfterDay: false,
                   tempEvent: adjustedEvent
                 };
-                column.events.push(event);
+                column.events.push(_event2);
               }
             });
           });
@@ -97869,15 +97871,15 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
             _this107.handleEvent('Edited', event);
           }
         }, {
-          label: '<i class="fas fa-fw fa-trash-alt"></i>',
-          a11yLabel: 'Delete',
+          label: '<i class="fas fa-plus-square fa-spin fa-lg"></i>',
+          a11yLabel: 'Add',
           onClick: function onClick(_ref125) {
             var event = _ref125.event;
             _this107.events = _this107.events.filter(function (iEvent) {
               return iEvent !== event;
             });
 
-            _this107.handleEvent('Deleted', event);
+            _this107.handleEvent('Add', event);
           }
         }];
       }
@@ -97902,6 +97904,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           this.events$ = this.leaveRequestService.getDashBoardRequests().pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["map"])(function (results) {
             return results.map(function (event) {
               return {
+                actions: _this108.actions,
                 title: event.title,
                 start: Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["startOfDay"])(new Date(event.startDate)),
                 end: Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["endOfDay"])(new Date(event.endDate)),
@@ -97932,12 +97935,17 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       }, {
         key: "dayClicked",
         value: function dayClicked(_ref126) {
+          var _this109 = this;
+
           var date = _ref126.date,
               events = _ref126.events;
 
           if (Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["isSameMonth"])(date, this.viewDate)) {
             if (Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["isSameDay"])(this.viewDate, date) && this.activeDayIsOpen === true || events.length === 0) {
               this.activeDayIsOpen = false;
+              this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', function (obj) {
+                _this109.leaveAddEvent(obj);
+              }, "OK");
             } else {
               this.activeDayIsOpen = true;
             }
@@ -97976,17 +97984,24 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       }, {
         key: "handleEvent",
         value: function handleEvent(action, event) {
-          var _this109 = this;
+          var _this110 = this;
 
           this.modalData = {
             event: event,
             action: action
           };
-          this.modelRef = this.modalService.openLeavePopUp(event, 'Leave Summary', function (obj) {
-            _this109.leaveCancelEvent(obj);
-          }, function (obj) {
-            _this109.leaveEditEvent(obj);
-          }, "Edit", "Cancel Leave");
+
+          if (action === 'Add') {
+            this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', function (obj) {
+              _this110.leaveAddEvent(obj);
+            }, "OK");
+          } else {
+            this.modelRef = this.modalService.openLeavePopUp(event, 'Leave Summary', function (obj) {
+              _this110.leaveCancelEvent(obj);
+            }, function (obj) {
+              _this110.leaveEditEvent(obj);
+            }, "Edit", "Cancel Leave");
+          }
         }
       }, {
         key: "redirectAfterSave",
@@ -98007,9 +98022,40 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           this.updateLeave(obj);
         }
       }, {
+        key: "leaveAddEvent",
+        value: function leaveAddEvent(obj) {
+          console.log(obj);
+          this.addLeave(obj.leave);
+        }
+      }, {
+        key: "addLeave",
+        value: function addLeave(leaveObj) {
+          var _this111 = this;
+
+          this.modelRef.hide();
+          this.spinner.show();
+          this.leaveRequestService.addLeaves(leaveObj).subscribe(function (resp) {
+            if (resp === true) {
+              _this111.loadCalenderEvents();
+
+              _this111.activeDayIsOpen = false;
+
+              _this111.interactionService.refreshGraph();
+
+              _this111.redirectAfterSave("Leave added successfully", function () {}, "Success");
+
+              _this111.spinner.hide();
+            } else {
+              _this111.redirectAfterSave("You already have active leave for applied period. Please re-visit your leaves", function () {}, "Error");
+
+              _this111.spinner.hide();
+            }
+          });
+        }
+      }, {
         key: "updateLeave",
         value: function updateLeave(leaveObj) {
-          var _this110 = this;
+          var _this112 = this;
 
           var _a;
 
@@ -98021,39 +98067,39 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           leave.endDate = leaveObj.endDate;
           this.leaveRequestService.updateLeaves(leave).subscribe(function (resp) {
             if (resp === true) {
-              _this110.loadCalenderEvents();
+              _this112.loadCalenderEvents();
 
-              _this110.activeDayIsOpen = false;
+              _this112.activeDayIsOpen = false;
 
-              _this110.interactionService.refreshGraph();
+              _this112.interactionService.refreshGraph();
 
-              _this110.redirectAfterSave("Leave updated successfully", function () {}, "Success");
+              _this112.redirectAfterSave("Leave updated successfully", function () {}, "Success");
 
-              _this110.spinner.hide();
+              _this112.spinner.hide();
             } else {
-              _this110.redirectAfterSave("You already have active leave for applied period. Please re-visit your leaves", function () {}, "Error");
+              _this112.redirectAfterSave("You already have active leave for applied period. Please re-visit your leaves", function () {}, "Error");
 
-              _this110.spinner.hide();
+              _this112.spinner.hide();
             }
           });
         }
       }, {
         key: "cancelLeave",
         value: function cancelLeave(reqId) {
-          var _this111 = this;
+          var _this113 = this;
 
           this.modelRef.hide();
           this.spinner.show();
           this.leaveRequestService.cancelLeaveReq(reqId).subscribe(function (resp) {
-            _this111.loadCalenderEvents();
+            _this113.loadCalenderEvents();
 
-            _this111.activeDayIsOpen = false;
+            _this113.activeDayIsOpen = false;
 
-            _this111.interactionService.refreshGraph();
+            _this113.interactionService.refreshGraph();
 
-            _this111.redirectAfterSave("Leave Cancelled successfully", function () {}, "Success");
+            _this113.redirectAfterSave("Leave Cancelled successfully", function () {}, "Success");
 
-            _this111.spinner.hide();
+            _this113.spinner.hide();
           });
         }
       }]);
@@ -98216,7 +98262,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       },
       directives: [angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵf"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵh"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵg"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgIf"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgSwitch"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["NgSwitchCase"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarMonthViewComponent"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarWeekViewComponent"], angular_calendar__WEBPACK_IMPORTED_MODULE_3__["CalendarDayViewComponent"], _angular_material_progress_spinner__WEBPACK_IMPORTED_MODULE_11__["MatSpinner"]],
       pipes: [angular_calendar__WEBPACK_IMPORTED_MODULE_3__["ɵi"], _angular_common__WEBPACK_IMPORTED_MODULE_10__["AsyncPipe"]],
-      styles: [".modal-content[_ngcontent-%COMP%] {\r\n    position: relative;\r\n    display: flex;\r\n    flex-direction: column;\r\n    width: 100%;\r\n    pointer-events: auto;\r\n    background-color: #fff;\r\n    background-clip: padding-box;\r\n    border: 3px solid #428fe2 !important;\r\n    border-radius: 0.5rem;\r\n    outline: 0;\r\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9hcHAvZGFzaGJvYXJkL2Rhc2hib2FyZC1jYWxlbmRlci9kYXNoYm9hcmQtY2FsZW5kZXIuY29tcG9uZW50LmNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtJQUNJLGtCQUFrQjtJQUNsQixhQUFhO0lBQ2Isc0JBQXNCO0lBQ3RCLFdBQVc7SUFDWCxvQkFBb0I7SUFDcEIsc0JBQXNCO0lBQ3RCLDRCQUE0QjtJQUM1QixvQ0FBb0M7SUFDcEMscUJBQXFCO0lBQ3JCLFVBQVU7QUFDZCIsImZpbGUiOiJzcmMvYXBwL2Rhc2hib2FyZC9kYXNoYm9hcmQtY2FsZW5kZXIvZGFzaGJvYXJkLWNhbGVuZGVyLmNvbXBvbmVudC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIubW9kYWwtY29udGVudCB7XHJcbiAgICBwb3NpdGlvbjogcmVsYXRpdmU7XHJcbiAgICBkaXNwbGF5OiBmbGV4O1xyXG4gICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcclxuICAgIHdpZHRoOiAxMDAlO1xyXG4gICAgcG9pbnRlci1ldmVudHM6IGF1dG87XHJcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAjZmZmO1xyXG4gICAgYmFja2dyb3VuZC1jbGlwOiBwYWRkaW5nLWJveDtcclxuICAgIGJvcmRlcjogM3B4IHNvbGlkICM0MjhmZTIgIWltcG9ydGFudDtcclxuICAgIGJvcmRlci1yYWRpdXM6IDAuNXJlbTtcclxuICAgIG91dGxpbmU6IDA7XHJcbn0iXX0= */"]
+      styles: [".modal-content[_ngcontent-%COMP%] {\r\n    position: relative;\r\n    display: flex;\r\n    flex-direction: column;\r\n    width: 100%;\r\n    pointer-events: auto;\r\n    background-color: #fff;\r\n    background-clip: padding-box;\r\n    border: 3px solid #428fe2 !important;\r\n    border-radius: 0.5rem;\r\n    outline: 0;\r\n}\r\n\r\n.fa-pencil-alt[_ngcontent-%COMP%] {\r\n    content: \"f303\";\r\n}\r\n\r\n.fa[_ngcontent-%COMP%], .fas[_ngcontent-%COMP%] {\r\n    font-weight: 900;\r\n}\r\n\r\n.fa-fw[_ngcontent-%COMP%] {\r\n    text-align: center;\r\n    width: 1.25em;\r\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9hcHAvZGFzaGJvYXJkL2Rhc2hib2FyZC1jYWxlbmRlci9kYXNoYm9hcmQtY2FsZW5kZXIuY29tcG9uZW50LmNzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtJQUNJLGtCQUFrQjtJQUNsQixhQUFhO0lBQ2Isc0JBQXNCO0lBQ3RCLFdBQVc7SUFDWCxvQkFBb0I7SUFDcEIsc0JBQXNCO0lBQ3RCLDRCQUE0QjtJQUM1QixvQ0FBb0M7SUFDcEMscUJBQXFCO0lBQ3JCLFVBQVU7QUFDZDs7QUFFQTtJQUNJLGVBQWU7QUFDbkI7O0FBQ0E7SUFDSSxnQkFBZ0I7QUFDcEI7O0FBQ0E7SUFDSSxrQkFBa0I7SUFDbEIsYUFBYTtBQUNqQiIsImZpbGUiOiJzcmMvYXBwL2Rhc2hib2FyZC9kYXNoYm9hcmQtY2FsZW5kZXIvZGFzaGJvYXJkLWNhbGVuZGVyLmNvbXBvbmVudC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIubW9kYWwtY29udGVudCB7XHJcbiAgICBwb3NpdGlvbjogcmVsYXRpdmU7XHJcbiAgICBkaXNwbGF5OiBmbGV4O1xyXG4gICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcclxuICAgIHdpZHRoOiAxMDAlO1xyXG4gICAgcG9pbnRlci1ldmVudHM6IGF1dG87XHJcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAjZmZmO1xyXG4gICAgYmFja2dyb3VuZC1jbGlwOiBwYWRkaW5nLWJveDtcclxuICAgIGJvcmRlcjogM3B4IHNvbGlkICM0MjhmZTIgIWltcG9ydGFudDtcclxuICAgIGJvcmRlci1yYWRpdXM6IDAuNXJlbTtcclxuICAgIG91dGxpbmU6IDA7XHJcbn1cclxuXHJcbi5mYS1wZW5jaWwtYWx0IHtcclxuICAgIGNvbnRlbnQ6IFwiZjMwM1wiO1xyXG59XHJcbi5mYSwgLmZhcyB7XHJcbiAgICBmb250LXdlaWdodDogOTAwO1xyXG59XHJcbi5mYS1mdyB7XHJcbiAgICB0ZXh0LWFsaWduOiBjZW50ZXI7XHJcbiAgICB3aWR0aDogMS4yNWVtO1xyXG59Il19 */"]
     });
     /*@__PURE__*/
 
@@ -98284,16 +98330,23 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     /* harmony import */
 
 
-    var _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(
+    var src_app_shared_service_modal_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(
+    /*! src/app/shared/service/modal-service */
+    "./src/app/shared/service/modal-service.ts");
+    /* harmony import */
+
+
+    var _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(
     /*! @swimlane/ngx-charts */
     "./node_modules/@swimlane/ngx-charts/__ivy_ngcc__/fesm2015/swimlane-ngx-charts.js");
 
     var DashboardGraphComponent = /*#__PURE__*/function () {
-      function DashboardGraphComponent(leaveRequestService, interactionService) {
+      function DashboardGraphComponent(leaveRequestService, interactionService, modalService) {
         _classCallCheck(this, DashboardGraphComponent);
 
         this.leaveRequestService = leaveRequestService;
         this.interactionService = interactionService;
+        this.modalService = modalService;
         this.view = [650, 300]; // options
 
         this.showXAxis = true;
@@ -98321,7 +98374,19 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       }, {
         key: "onSelect",
         value: function onSelect(data) {
-          console.log('Item clicked', JSON.parse(JSON.stringify(data)));
+          var _this114 = this;
+
+          this.leaveRequestService.getGraphSummary(data).subscribe(function (resp) {
+            _this114.modelRef = _this114.modalService.openGraphSummaryPopUp(resp, 'Leave Summary', function (obj) {
+              _this114.okClickEvent(obj);
+            }, "OK");
+            console.log('Item clicked', JSON.parse(JSON.stringify(data)));
+          });
+        }
+      }, {
+        key: "okClickEvent",
+        value: function okClickEvent(obj) {
+          this.modelRef.hide();
         }
       }, {
         key: "onActivate",
@@ -98336,20 +98401,20 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       }, {
         key: "getGraphData",
         value: function getGraphData() {
-          var _this112 = this;
+          var _this115 = this;
 
           this.leaveRequestService.getDashBoardGraphRequests().subscribe(function (resp) {
-            _this112.multi = resp.dashBoardGraphDto;
+            _this115.multi = resp.dashBoardGraphDto;
           });
         }
       }, {
         key: "ngOnInit",
         value: function ngOnInit() {
-          var _this113 = this;
+          var _this116 = this;
 
           this.getGraphData();
           this.interactionService.grapph$.subscribe(function (resp) {
-            _this113.getGraphData();
+            _this116.getGraphData();
           });
         }
       }]);
@@ -98358,7 +98423,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     }();
 
     DashboardGraphComponent.ɵfac = function DashboardGraphComponent_Factory(t) {
-      return new (t || DashboardGraphComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service__WEBPACK_IMPORTED_MODULE_1__["LeaveRequestService"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__["InteractionService"]));
+      return new (t || DashboardGraphComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service__WEBPACK_IMPORTED_MODULE_1__["LeaveRequestService"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__["InteractionService"]), _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdirectiveInject"](src_app_shared_service_modal_service__WEBPACK_IMPORTED_MODULE_3__["ModalService"]));
     };
 
     DashboardGraphComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({
@@ -98414,7 +98479,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵproperty"]("view", ctx.view)("scheme", ctx.colorScheme)("legend", ctx.showLegend)("showXAxisLabel", ctx.showXAxisLabel)("showYAxisLabel", ctx.showYAxisLabel)("xAxis", ctx.showXAxis)("yAxis", ctx.showYAxis)("legendTitle", ctx.legendTitle1)("xAxisLabel", ctx.xAxisLabelBar)("yAxisLabel", ctx.yAxisLabel)("results", ctx.multi);
         }
       },
-      directives: [_swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_3__["BarVertical2DComponent"], _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_3__["LineChartComponent"]],
+      directives: [_swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_4__["BarVertical2DComponent"], _swimlane_ngx_charts__WEBPACK_IMPORTED_MODULE_4__["LineChartComponent"]],
       styles: ["\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzcmMvYXBwL2Rhc2hib2FyZC9kYXNoYm9hcmQtZ3JhcGgvZGFzaGJvYXJkLWdyYXBoLmNvbXBvbmVudC5jc3MifQ== */"]
     });
     /*@__PURE__*/
@@ -98432,6 +98497,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           type: src_app_core_service__WEBPACK_IMPORTED_MODULE_1__["LeaveRequestService"]
         }, {
           type: src_app_core_service_interaction_service__WEBPACK_IMPORTED_MODULE_2__["InteractionService"]
+        }, {
+          type: src_app_shared_service_modal_service__WEBPACK_IMPORTED_MODULE_3__["ModalService"]
         }];
       }, null);
     })();
