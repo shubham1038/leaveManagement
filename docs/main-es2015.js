@@ -717,7 +717,7 @@ class EmployeeService {
         //http url
         //private baseUrl ="http://ec2-15-206-159-184.ap-south-1.compute.amazonaws.com/fse-pm-app/api/users/";
         //Https Url
-        this.baseUrl = "https://shubhtech1038.xyz/fse-pm-app/api/emp/";
+        this.baseUrl = "https://shubh1038.xyz/fse-pm-app/api/emp/";
     }
     addUser(employee) {
         return this.http.post(`${this.baseUrl}` + 'save-emp', employee).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
@@ -826,7 +826,7 @@ __webpack_require__.r(__webpack_exports__);
 class LeaveRequestService {
     constructor(http) {
         this.http = http;
-        this.baseUrl = "https://shubhtech1038.xyz/fse-pm-app/api/leave/";
+        this.baseUrl = "https://shubh1038.xyz/fse-pm-app/api/leave/";
     }
     getLeaveRequests() {
         return this.http.get(`${this.baseUrl}` + 'leave-req-list').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
@@ -839,17 +839,17 @@ class LeaveRequestService {
         }));
     }
     getDashBoardRequests() {
-        return this.http.get('https://shubhtech1038.xyz/fse-pm-app/api/dashBoard/' + 'request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
+        return this.http.get('https://shubh1038.xyz/fse-pm-app/api/dashBoard/' + 'request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
             return Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["throwError"])(this.errorHandler);
         }));
     }
     getDashBoardGraphRequests() {
-        return this.http.get('https://shubhtech1038.xyz/fse-pm-app/api/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
+        return this.http.get('https://shubh1038.xyz/fse-pm-app/api/dashBoard/' + 'graph-request').pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
             return Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["throwError"])(this.errorHandler);
         }));
     }
     getGraphSummary(data) {
-        return this.http.get('https://shubhtech1038.xyz/fse-pm-app/api/dashBoard/' + 'graph-summary/' + data.series + '/' + data.name).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
+        return this.http.get('https://shubh1038.xyz/fse-pm-app/api/dashBoard/' + 'graph-summary/' + data.series + '/' + data.name).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["retry"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["catchError"])(err => {
             return Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["throwError"])(this.errorHandler);
         }));
     }
