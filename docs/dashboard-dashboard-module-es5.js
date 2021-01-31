@@ -97942,10 +97942,13 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
           if (Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["isSameMonth"])(date, this.viewDate)) {
             if (Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["isSameDay"])(this.viewDate, date) && this.activeDayIsOpen === true || events.length === 0) {
+              if (events.length === 0) {
+                this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', function (obj) {
+                  _this109.leaveAddEvent(obj);
+                }, "OK");
+              }
+
               this.activeDayIsOpen = false;
-              this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', function (obj) {
-                _this109.leaveAddEvent(obj);
-              }, "OK");
             } else {
               this.activeDayIsOpen = true;
             }
@@ -98377,9 +98380,12 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
           var _this114 = this;
 
           this.leaveRequestService.getGraphSummary(data).subscribe(function (resp) {
-            _this114.modelRef = _this114.modalService.openGraphSummaryPopUp(resp, 'Leave Summary', function (obj) {
-              _this114.okClickEvent(obj);
-            }, "OK");
+            if (resp.length != 0) {
+              _this114.modelRef = _this114.modalService.openGraphSummaryPopUp(resp, 'Leave Summary', function (obj) {
+                _this114.okClickEvent(obj);
+              }, "OK");
+            }
+
             console.log('Item clicked', JSON.parse(JSON.stringify(data)));
           });
         }

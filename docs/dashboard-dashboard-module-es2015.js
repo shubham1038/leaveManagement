@@ -66094,8 +66094,10 @@ class DashboardCalenderComponent {
         if (Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["isSameMonth"])(date, this.viewDate)) {
             if ((Object(date_fns__WEBPACK_IMPORTED_MODULE_1__["isSameDay"])(this.viewDate, date) && this.activeDayIsOpen === true) ||
                 events.length === 0) {
+                if (events.length === 0) {
+                    this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', (obj) => { this.leaveAddEvent(obj); }, "OK");
+                }
                 this.activeDayIsOpen = false;
-                this.modelRef = this.modalService.openNewLeaveReqPopUp(event, 'New Leave Request', (obj) => { this.leaveAddEvent(obj); }, "OK");
             }
             else {
                 this.activeDayIsOpen = true;
@@ -66319,7 +66321,9 @@ class DashboardGraphComponent {
     }
     onSelect(data) {
         this.leaveRequestService.getGraphSummary(data).subscribe(resp => {
-            this.modelRef = this.modalService.openGraphSummaryPopUp(resp, 'Leave Summary', (obj) => { this.okClickEvent(obj); }, "OK");
+            if (resp.length != 0) {
+                this.modelRef = this.modalService.openGraphSummaryPopUp(resp, 'Leave Summary', (obj) => { this.okClickEvent(obj); }, "OK");
+            }
             console.log('Item clicked', JSON.parse(JSON.stringify(data)));
         });
     }
